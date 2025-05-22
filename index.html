@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Docker ve GitHub Komutları</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary-color: #a78bfa;
+        --secondary-color: #8b5cf6;
+        --background-color: #0f172a;
+        --card-background: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #e2e8f0;
+        --accent-color: #c4b5fd;
+        --command-bg: #312e81;
+        --command-text: #f8fafc;
+        --gradient-start: #a78bfa;
+        --gradient-end: #8b5cf6;
+        --hover-color: #4338ca;
+        --code-color: #a5b4fc;
+        --description-color: #c7d2fe;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --error-color: #ef4444;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      @keyframes glow {
+        0% {
+          box-shadow: 0 0 5px rgba(167, 139, 250, 0.2);
+        }
+        50% {
+          box-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
+        }
+        100% {
+          box-shadow: 0 0 5px rgba(167, 139, 250, 0.2);
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        background-color: var(--background-color);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 2rem;
+        background-image: radial-gradient(
+            circle at 100% 0%,
+            rgba(167, 139, 250, 0.15) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 0% 100%,
+            rgba(139, 92, 246, 0.15) 0%,
+            transparent 50%
+          );
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle at 20% 20%,
+            rgba(167, 139, 250, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(139, 92, 246, 0.1) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: var(--card-background);
+        padding: 3rem;
+        border-radius: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+          0 2px 4px -2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(167, 139, 250, 0.1);
+        backdrop-filter: blur(10px);
+        animation: glow 3s infinite;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(
+          circle,
+          rgba(167, 139, 250, 0.2) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        z-index: -1;
+      }
+
+      h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #e9d5ff, #c4b5fd);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 30px rgba(233, 213, 255, 0.6);
+        position: relative;
+        display: inline-block;
+      }
+
+      h1::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, #e9d5ff, #c4b5fd);
+        border-radius: 2px;
+        box-shadow: 0 0 10px rgba(233, 213, 255, 0.6);
+      }
+
+      h2 {
+        color: #e9d5ff;
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 2rem 0 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid rgba(233, 213, 255, 0.3);
+        transition: all 0.3s ease;
+        text-shadow: 0 0 10px rgba(233, 213, 255, 0.4);
+      }
+
+      h2:hover {
+        color: #f3e8ff;
+        border-bottom-color: #f3e8ff;
+        text-shadow: 0 0 15px rgba(243, 232, 255, 0.6);
+      }
+
+      .section {
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 2rem 0;
+        border: 1px solid rgba(167, 139, 250, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        animation: slideIn 0.5s ease-out;
+      }
+
+      .section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent-color),
+          transparent
+        );
+      }
+
+      .section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(167, 139, 250, 0.2),
+          0 2px 4px -2px rgba(167, 139, 250, 0.2);
+        border-color: var(--accent-color);
+      }
+
+      .command-group {
+        margin: 1.5rem 0;
+      }
+
+      .command-group h3 {
+        color: var(--accent-color);
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-left: 1rem;
+        border-left: 4px solid var(--accent-color);
+        transition: all 0.3s ease;
+        text-shadow: 0 0 8px rgba(196, 181, 253, 0.2);
+      }
+
+      .command-group:hover h3 {
+        color: var(--primary-color);
+        border-left-color: var(--primary-color);
+        text-shadow: 0 0 12px rgba(167, 139, 250, 0.3);
+      }
+
+      .command {
+        background: var(--command-bg);
+        color: var(--command-text);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--accent-color);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        animation: slideIn 0.5s ease-out;
+      }
+
+      .command:hover {
+        transform: translateX(5px);
+        background: var(--hover-color);
+        border-left-color: var(--primary-color);
+      }
+
+      .command::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(167, 139, 250, 0.2),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      .command:hover::before {
+        left: 100%;
+      }
+
+      .command i {
+        font-size: 1.2rem;
+        color: var(--accent-color);
+        transition: all 0.3s ease;
+      }
+
+      .command:hover i {
+        color: var(--primary-color);
+        transform: scale(1.1);
+      }
+
+      code {
+        font-family: "Fira Code", monospace;
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--code-color);
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .command:hover code {
+        color: var(--description-color);
+        text-shadow: 0 0 8px rgba(165, 180, 252, 0.5);
+      }
+
+      .command span {
+        color: var(--description-color);
+        transition: color 0.3s ease;
+      }
+
+      .command:hover span {
+        color: var(--text-primary);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .badge i {
+        font-size: 0.8rem;
+      }
+
+      .badge-success {
+        background-color: var(--success-color);
+        color: white;
+      }
+
+      .badge-warning {
+        background-color: var(--warning-color);
+        color: white;
+      }
+
+      .badge-error {
+        background-color: var(--error-color);
+        color: white;
+      }
+
+      .badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      }
+
+      .command a {
+        color: var(--accent-color);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-family: "Fira Code", monospace;
+        background: rgba(167, 139, 250, 0.1);
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        border: 1px solid rgba(167, 139, 250, 0.2);
+      }
+
+      .command a:hover {
+        color: var(--primary-color);
+        background: rgba(167, 139, 250, 0.2);
+        border-color: var(--primary-color);
+        transform: translateY(-1px);
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 0.5rem;
+        }
+
+        .container {
+          padding: 1rem;
+          border-radius: 16px;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        h2 {
+          font-size: 1.3rem;
+        }
+
+        .section {
+          padding: 1rem;
+          margin: 1rem 0;
+        }
+
+        .command {
+          padding: 0.8rem 1rem;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+
+        .command i {
+          font-size: 1rem;
+        }
+
+        .command code {
+          font-size: 0.85rem;
+          width: 100%;
+          overflow-x: auto;
+          white-space: nowrap;
+        }
+
+        .command span {
+          font-size: 0.9rem;
+        }
+
+        .badge {
+          font-size: 0.7rem;
+          padding: 0.2rem 0.5rem;
+        }
+
+        .command a {
+          width: 100%;
+          display: block;
+          text-align: center;
+          margin: 0.5rem 0;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 0.25rem;
+        }
+
+        .container {
+          padding: 0.75rem;
+          border-radius: 12px;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        h2 {
+          font-size: 1.2rem;
+        }
+
+        .command-group h3 {
+          font-size: 1.1rem;
+        }
+
+        .command {
+          padding: 0.6rem 0.8rem;
+        }
+
+        .command code {
+          font-size: 0.8rem;
+        }
+
+        .command span {
+          font-size: 0.85rem;
+        }
+      }
+
+      /* Mobil cihazlar için dokunmatik hedef boyutlarını artırma */
+      @media (hover: none) {
+        .command,
+        .badge {
+          min-height: 44px;
+        }
+
+        .command i {
+          font-size: 1.2rem;
+        }
+      }
+
+      /* Yatay mobil görünüm için ek düzenlemeler */
+      @media (max-width: 768px) and (orientation: landscape) {
+        .container {
+          padding: 1.5rem;
+        }
+
+        .command {
+          flex-direction: row;
+          align-items: center;
+        }
+
+        .command code {
+          width: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Docker ve GitHub Komutları</h1>
+        <h2>Teknokent Sunum | GitHub ve Docker</h2>
+      </div>
+
+      <div class="section">
+        <h2><i class="fab fa-github"></i> GitHub Komutları</h2>
+
+        <div class="command-group">
+          <h3>Temel Git Komutları</h3>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git init</code>
+            <span>Yeni bir Git deposu oluşturur</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git clone [url]</code>
+            <span>Uzak depoyu yerel bilgisayara kopyalar</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git status</code>
+            <span>Depo durumunu gösterir</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+        </div>
+
+        <div class="command-group">
+          <h3>Değişiklik Yönetimi</h3>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git add .</code>
+            <span>Tüm değişiklikleri staging area'ya ekler</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git commit -m "mesaj"</code>
+            <span>Değişiklikleri commit eder</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git push</code>
+            <span
+              >Yerel değişiklikleri uzak depoya gönderir. Pull edilebilir.</span
+            >
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git pull</code>
+            <span>Uzak depodaki değişiklikleri çeker</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+        </div>
+
+        <div class="command-group">
+          <h3>Branch İşlemleri</h3>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git branch</code>
+            <span>Branch'leri listeler</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git checkout -b [branch_name]</code>
+            <span>Yeni branch oluşturur ve geçiş yapar</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git merge [branch_name]</code>
+            <span>Branch'i ana branch ile birleştirir</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+        </div>
+
+        <div class="command-group">
+          <h3>Diğer Önemli Komutlar</h3>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git log</code>
+            <span>Commit geçmişini gösterir</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git reset [commit]</code>
+            <span>Belirli bir commit'e geri döner</span>
+            <span class="badge badge-error"
+              ><i class="fas fa-star"></i> İleri</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>git stash</code>
+            <span>Değişiklikleri geçici olarak saklar</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2><i class="fab fa-docker"></i> Docker Komutları</h2>
+
+        <div class="command-group">
+          <h3>Konteyner Yönetimi</h3>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker run [image]</code>
+            <span>Yeni bir konteyner başlatır</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker ps</code>
+            <span>Çalışan konteynerleri listeler</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker ps -a</code>
+            <span>Tüm konteynerleri listeler</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker stop [container_id]</code>
+            <span>Konteyneri durdurur</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker rm [container_id]</code>
+            <span>Konteyneri siler</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+        </div>
+
+        <div class="command-group">
+          <h3>Image Yönetimi</h3>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker build -t [name] .</code>
+            <span>Dockerfile'dan image oluşturur</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker images</code>
+            <span>Tüm imageleri listeler</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker pull [image]</code>
+            <span>Image'i Docker Hub'dan çeker</span>
+            <span class="badge badge-success"
+              ><i class="fas fa-star"></i> Temel</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker push [image]</code>
+            <span>Image'i Docker Hub'a gönderir</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+        </div>
+
+        <div class="command-group">
+          <h3>Diğer Önemli Komutlar</h3>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker logs [container_id]</code>
+            <span>Konteyner loglarını gösterir</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker exec -it [container_id] bash</code>
+            <span>Konteyner içine bağlanır</span>
+            <span class="badge badge-warning"
+              ><i class="fas fa-star-half-alt"></i> Orta</span
+            >
+          </div>
+          <div class="command">
+            <i class="fas fa-terminal"></i>
+            <code>docker-compose up</code>
+            <span>Docker Compose ile servisleri başlatır</span>
+            <span class="badge badge-error"
+              ><i class="fas fa-star"></i> İleri</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
